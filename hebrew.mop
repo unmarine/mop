@@ -1,0 +1,36 @@
+root "Biblical Hebrew" as "root".
+
+from "root" text "Root system" as "rootsys".
+from "rootsys" text "All verbs" as "allverbs".
+from "rootsys" text "All derived nouns" as "alldnouns".
+from "rootsys" text "Most adjectives" as "mostadj".
+
+from "root" text "Phonetics" as "phonetics".
+from "phonetics" text "Long and short vowels" as "landsv".
+from "phonetics" text "Matres lectionis" as "matlec".
+from "phonetics" text "Full and defective spellings" as "fanddspel".
+from "phonetics" text "Shewa" as "shewa".
+
+
+from "phonetics" text "Stress" as "stress".
+from "stress" text "Mostly ultimate" as "mul".
+from "stress" text "Less frequently penultimate" as "leful".
+
+from "shewa" text "Vocal" as "shewavoc".
+from "shewavoc" text "Beginning of the word" as "botw".
+from "shewavoc" text "Second of two conseq shewas" as "sotsh".
+from "shewavoc" text "After strong dagesh consonant" as "asdcs".
+from "shewavoc" text "After a long vowel" as "afalv".
+
+from "shewa" text "Silent" as "shewasil".
+from "shewasil" text "End of word" as "eoww".
+from "shewasil" text "First of two shewas" as "fotss".
+from "shewasil" text "After short unstressed vowel" as "asuvv".
+from "shewasil" text "Immediately after stressed syllable" as "iass".
+
+from "shewa" text "Composite" as "shewacomp".
+
+from "shewacomp" text "Gutturals" as "gutturals".
+from "gutturals" text "Pronounced in throat" as "ppint".
+from "gutturals" text "Aleph, Hey, Het, Ayin" as "gutturalletters".
+from "shewacomp" text "Always vocal" as "alvocl".
