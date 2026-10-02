@@ -1,0 +1,29 @@
+* Keywords
+The keywords are following:
++ root
+  this keyword defines the start of the map, and is the first node to be added to the tree
++ from
+  this keyword fetches reference and appends a new node to it.
++ as
+  this keyword defines reference to the node, all from keywords require it
++ text
+  this keyword defines the text of the new created node.
+
+* Grammar
++ all custom data is seen as string, and is represented as "...".
+  let's refer to it as literal
+
++ to define root node, you would do:
+  root literal as literal
+
++ to define a new child, you woud do:
+  from literal text literal as literal
+
+But there is a great difference between reference and identifier, and so any literal
+after such keywords as "from" and "as" is used as reference (i.e. to retrieve the node's address)
+
+* Usage
+The program will compile and produce a mind map.
+
+mop -f "destination" -o "output file name" -e "engine name, if there will be more than one implemented"
+I aim at png, but maybe future will make me do something like -p "svg" thing.
