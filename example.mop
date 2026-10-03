@@ -1,4 +1,4 @@
-root "Why do we need mindmaps?" as "root".
+root "Why do we need mindmaps?".
 
 from "root" text "University asks for it" as "uai".
 from "root" text "School asks for it" as "sai".

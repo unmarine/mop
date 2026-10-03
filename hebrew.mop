@@ -1,4 +1,4 @@
-root "Biblical Hebrew" as "root".
+root "Biblical Hebrew".
 
 from "root" text "Root system" as "rootsys".
 from "rootsys" text "All verbs" as "allverbs".

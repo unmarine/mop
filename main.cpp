@@ -58,7 +58,7 @@ std::vector<Token> Parse(std::string &source) {
   std::vector<std::string> statements = SplitByDelimeter(source, '.');
 
   std::regex from_pattern(R"(from\s*\"(.+)\"\s*text\s*\"(.+)\"\s*as\s*\"(.+)\")");
-  std::regex root_pattern(R"(root\s*\"(.+)\"\s*as\s*\"(.+)\")");
+  std::regex root_pattern(R"(root\s*\"(.+)\")");
   
   for (std::string& statement : statements) {
 	std::smatch matches;
@@ -75,12 +75,11 @@ std::vector<Token> Parse(std::string &source) {
 	}
 	else if (std::regex_search(statement, matches, root_pattern)) {
 	  std::string content_of_root_node = matches[1].str();
-	  std::string reference_of_root_node = matches[2].str();
 	  tokens.push_back({
 		  TokenType::RootNode,
 		  "",
 		  content_of_root_node,
-		  reference_of_root_node
+		  "root"
 		});
 	}
 	else std::cout << "Invalid statment\n";
@@ -182,7 +181,7 @@ void ShowTokens(std::vector<Token> tokens) {
   }
 }
 
-void Render(Node* root, const char* filename, const char* format = "png") {
+void Render(Node* root, const char* filename, const char* format = "png", const char* engine = "twopi") {
   if (!root) return;
 
   GVC_t* gvc = gvContext();
@@ -192,15 +191,18 @@ void Render(Node* root, const char* filename, const char* format = "png") {
   agattr(g, AGRAPH, (char*)"rankdir", (char*)"TB");
   agattr(g, AGNODE, (char*)"fontsize", (char*)"14");
 
-
-  agsafeset(g, (char*)"nodesep", (char*)"0.2", (char*)"");
+  // agsafeset(g, (char*)"nodesep", (char*)"0.2", (char*)"");
   // agsafeset(g, (char*)"size", (char*)"6.4,3.6!", (char*)"");
-  agsafeset(g, (char*)"dpi", (char*)"300", (char*)"");
+  // agsafeset(g, (char*)"dpi", (char*)"300", (char*)"");
   // agsafeset(g, (char*)"overlap", (char*)"scale", (char*)"");
-  // agsafeset(g, (char*)"overlap", (char*)"false", (char*)"");
+  agsafeset(g, (char*)"overlap", (char*)"false", (char*)"");
   agsafeset(g, (char*)"nodesep", (char*)"5.0", (char*)"");
   agsafeset(g, (char*)"ranksep", (char*)"4.3", (char*)"");
-  
+
+  agsafeset(g, (char*)"K", (char*)"0.1", (char*)"");
+
+
+
   std::map<Node*, Agnode_t*> ag_nodes;
 
   std::vector<Node*> queue = { root };
@@ -234,7 +236,7 @@ void Render(Node* root, const char* filename, const char* format = "png") {
 	}
   }
 
-  gvLayout(gvc, g, "twopi");
+  gvLayout(gvc, g, engine);
   gvRenderFilename(gvc, g, format, filename);
 
   gvFreeLayout(gvc, g);
@@ -249,17 +251,25 @@ int main(int argc, char** argv) {
   std::string filename = "";
   std::string output_filename = "";
   std::string format = "png";
+  std::string engine = "twopi";
   
   app.add_option("-i", filename, "Path of your .mop file.");
   app.add_option("-o", output_filename, "Path of your generated mindmap. Does not define the format, so write .png yourself.");
   app.add_option("-f", format, "Format of your file, e.g. png, svg, etc.");
+  app.add_option("-e", engine, "Engine used to display your mindmap.");
+  
   CLI11_PARSE(app, argc, argv);
+  
+  if (filename == "" || output_filename == "") {
+	std::cout << app.help() << std::endl;
+	return 1;
+  }
   
   std::string source = ReadFile(filename);
 
   std::vector<Token> tokens = Parse(source);
   Interpret(tokens);
   Node* root = ReferenceTable::GetNode("root");
-  Render(root, output_filename.c_str(), format.c_str());
+  Render(root, output_filename.c_str(), format.c_str(), engine.c_str());
 }
 
