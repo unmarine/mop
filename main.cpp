@@ -52,6 +52,16 @@ std::vector<std::string> SplitByDelimeter(std::string &source, char delimeter) {
   return strings;
 }
 
+
+/*
+  from "phonetics" texts [
+  "Long and short vowels" as "landsv",
+  "Matres lectionis" as "matlec",
+  "Full and defective spellings" as "fanddspel",
+  "Shewa" as "shewa"
+  ].
+*/
+
 std::vector<Token> Parse(std::string &source) {
   std::vector<Token> tokens;
 
@@ -59,9 +69,14 @@ std::vector<Token> Parse(std::string &source) {
 
   std::regex from_pattern(R"(from\s*\"(.+)\"\s*text\s*\"(.+)\"\s*as\s*\"(.+)\")");
   std::regex root_pattern(R"(root\s*\"(.+)\")");
+
+  std::regex from_multiple_pattern(R"(from\s*\"(.+)\"\s*texts\s*\[(.*)\])");
+  std::regex from_multiple_child_pattern(R"(\"(.+)\"\s*as\s*\"(.+)\")");
   
   for (std::string& statement : statements) {
 	std::smatch matches;
+	std::smatch child_matches;
+	
 	if (std::regex_search(statement, matches, from_pattern)) {
 	  std::string reference_of_parent_node = matches[1].str();
 	  std::string content_of_child_node = matches[2].str();
@@ -73,6 +88,29 @@ std::vector<Token> Parse(std::string &source) {
 		  reference_of_child_node
 		});
 	}
+	else if (std::regex_search(statement, matches, from_multiple_pattern)) {
+	  std::string reference_of_parent_node = matches[1].str();
+	  std::string children_descriptions = matches[2].str();
+
+	  
+	  
+	  std::vector<std::string> descriptions = SplitByDelimeter(children_descriptions, ',');
+	  for (std::string& description : descriptions) {
+		if (std::regex_search(description, child_matches, from_multiple_child_pattern)) {
+		  std::string content = child_matches[1];
+		  std::string child_reference = child_matches[2];
+		  tokens.push_back({
+			  TokenType::FromNode,
+			  reference_of_parent_node,
+			  content,
+			  child_reference
+			});
+		} else {
+		  std::cout << "Invalid statement\n";
+		}
+	  }
+	}
+	  
 	else if (std::regex_search(statement, matches, root_pattern)) {
 	  std::string content_of_root_node = matches[1].str();
 	  tokens.push_back({
@@ -94,9 +132,6 @@ public:
   std::string content;
   std::vector<Node*> children;
   Node* parent;
-
-  double x;
-  double y;
   
   Node(Node* parent, std::string content) {
 	this->content = content;
@@ -174,9 +209,9 @@ std::string ReadFile(std::string filename) {
 void ShowTokens(std::vector<Token> tokens) {
   for (Token token: tokens) {
 	if (token.type == TokenType::RootNode) {
-	  	std::cout << "Root content: <<" << token.content << ">> | root reference: <<" << token.reference << ">>\n";
+	  std::cout << "Root content: <<" << token.content << ">> | root reference: <<" << token.reference << ">>\n";
 	} else {
-	std::cout << "Parent reference: <<" << token.parent_reference << " >>| content: <<" << token.content << " >> | reference: <<" << token.reference << ">>\n";
+	  std::cout << "Parent reference: <<" << token.parent_reference << " >>| content: <<" << token.content << " >> | reference: <<" << token.reference << ">>\n";
 	}
   }
 }
