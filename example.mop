@@ -1,9 +1,11 @@
 root "Why do we need mindmaps?".
 
-from "root" text "University asks for it" as "uai".
-from "root" text "School asks for it" as "sai".
-from "root" text "Job asks for it" as "jai".
-from "root" text "We hate ourselves" as "who".
+from "root" texts [
+	 "University asks for it" as "uai",
+	 "School asks for it" as "sai",
+	 "Job asks for it" as "jai",
+	 "We hate ourselves" as "who"
+].
 
 from "uai" text "That's what made me make this thing" as "uai2".
 from "uai" text "And I actually used it to make the mindmap" as "uai3".

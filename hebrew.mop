@@ -2,47 +2,46 @@ root "Biblical Hebrew".
 
 from "root" text "Root system" as "rootsys".
 from "rootsys" texts [
-	 "All verbs" as "allverbs",
-	 "All derived nouns" as "alldnouns",
-	 "Most adjectives" as "mostadj"
+	 "All verbs" as "",
+	 "All derived nouns" as "",
+	 "Most adjectives" as ""
 ].
 
 from "root" text "Phonetics" as "phonetics".
 
 from "phonetics" texts [
-	 "Long and short vowels" as "landsv",
-	 "Matres lectionis" as "matlec",
-	 "Full and defective spellings" as "fanddspel",
+	 "Long and short vowels" as "",
+	 "Matres lectionis" as "",
+	 "Full and defective spellings" as "",
 	 "Shewa" as "shewa",
 	 "Stress" as "stress"
 ].
 
 from "stress" texts [
-	 "Mostly ultimate" as "mul",
-	 "Less frequently penultimate" as "leful"
+	 "Mostly ultimate" as "",
+	 "Less frequently penultimate" as ""
 ].
-
 
 from "shewa" text "Vocal" as "shewavoc".
 
 from "shewavoc" texts [
-	 "Beginning of the word" as "botw",
-	 "Second of two conseq shewas" as "sotsh",
-	 "After strong dagesh consonant" as "asdcs",
-	 "After a long vowel" as "afalv"
+	 "Beginning of the word" as "",
+	 "Second of two conseq shewas" as "",
+	 "After strong dagesh consonant" as "",
+	 "After a long vowel" as ""
 ].
 
 
 from "shewa" text "Silent" as "shewasil".
 from "shewasil" texts [
-	  "End of word" as "eoww",
-	  "First of two shewas" as "fotss",
-	  "After short unstressed vowel" as "asuvv",
-	  "Immediately after stressed syllable" as "iass"
+	  "End of word" as "",
+	  "First of two shewas" as "",
+	  "After short unstressed vowel" as "",
+	  "Immediately after stressed syllable" as ""
 ].
 
 from "shewa" text "Composite" as "shewacomp".
-from "shewacomp" text "Always vocal" as "alvocl".
+from "shewacomp" text "Always vocal" as "".
 
 from "shewacomp" text "Gutturals" as "gutturals".
 from "gutturals" texts [

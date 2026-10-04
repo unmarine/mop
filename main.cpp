@@ -25,8 +25,8 @@ std::string Trim(std::string &source) {
   int lower_bound = 0;
   int upper_bound = source.length();
 
-  while (source[lower_bound] == ' ') lower_bound++;
-  while (source[upper_bound] == ' ') upper_bound--;
+  while (source[lower_bound] == ' ' || source[lower_bound] == '\t') lower_bound++;
+  while (source[upper_bound] == ' ' || source[upper_bound] == '\t') upper_bound--;
 
   for (int i = lower_bound; i < upper_bound; i++) buffer.push_back(source[i]);
   return buffer;
@@ -67,11 +67,11 @@ std::vector<Token> Parse(std::string &source) {
 
   std::vector<std::string> statements = SplitByDelimeter(source, '.');
 
-  std::regex from_pattern(R"(from\s*\"(.+)\"\s*text\s*\"(.+)\"\s*as\s*\"(.+)\")");
+  std::regex from_pattern(R"(from\s*\"(.+)\"\s*text\s*\"(.+)\"\s*as\s*\"(.*)\")");
   std::regex root_pattern(R"(root\s*\"(.+)\")");
 
   std::regex from_multiple_pattern(R"(from\s*\"(.+)\"\s*texts\s*\[(.*)\])");
-  std::regex from_multiple_child_pattern(R"(\"(.+)\"\s*as\s*\"(.+)\")");
+  std::regex from_multiple_child_pattern(R"(\"(.+)\"\s*as\s*\"(.*)\")");
   
   for (std::string& statement : statements) {
 	std::smatch matches;
@@ -142,6 +142,8 @@ public:
 class ReferenceTable {
 private:
   inline static std::map<std::string, Node*> table;
+  int unknown_reference_counter = 1; //
+  std::string unknown_reference_prefix = "unknown_54209348092384023423339834989_";
   
 public:
   static void AddReference(std::string& reference, Node* node) {
