@@ -20,6 +20,16 @@ struct Token {
   std::string reference;
 };
 
+// void Render(Node* root, const char* filename, const char* dpi = "\0", const char* inch_width = "\0", const char* inch_height = "\0", const char* format = "png", const char* engine = "twopi") {
+struct Config {
+  std::string filename;
+  std::string inch_width;
+  std::string inch_height;
+  std::string dpi;
+  std::string format;
+  std::string engine;
+};
+
 std::string Trim(std::string &source) {
   std::string buffer = "";
   int lower_bound = 0;
@@ -60,6 +70,23 @@ std::vector<std::string> SplitByDelimeter(std::string &source, char delimeter) {
   "Full and defective spellings" as "fanddspel",
   "Shewa" as "shewa"
   ].
+*/
+/*
+std::smatch MatchTextReference(std::string &source) {
+  std::regex assignation_pattern(R"(\"(.*)\"\s*as\s*\"(.*)\")");
+  
+  std::smatch matches;
+  // ugly syntax, maybe can simplify.
+  if (std::regex_search(source, matches, assignation_pattern)) {
+  } else {
+	std::cout << "Failed to read text and reference in the string: " << source << std::endl;
+  }
+  return matches;
+}
+
+std::smatch MatchSingularAssignation(std::string &source) {
+  st
+}
 */
 
 std::vector<Token> Parse(std::string &source) {
@@ -218,27 +245,33 @@ void ShowTokens(std::vector<Token> tokens) {
   }
 }
 
-void Render(Node* root, const char* filename, const char* format = "png", const char* engine = "twopi") {
+void Render(Node* root, const char* filename, const char* dpi = "\0", const char* inch_width = "\0", const char* inch_height = "\0", const char* format = "png", const char* engine = "twopi") {
   if (!root) return;
 
   GVC_t* gvc = gvContext();
 
   Agraph_t* g = agopen((char*)"mindmap", Agdirected, nullptr);
+  agattr(g, AGRAPH, (char*)"ranksep", (char*)"1.0");
+  agattr(g, AGRAPH, (char*)"overlap", (char*)"scalexy");
+  agattr(g, AGRAPH, (char*)"splines", (char*)"true");
 
+  if (dpi[0] != '\0') {
+	agattr(g, AGRAPH, (char*)"dpi", dpi);
+  }
+  
+  if (inch_width[0] != '\0' && inch_height[0] != '\0') {
+	std::string size = std::string(inch_width) + "," + inch_height + "!";
+	agattr(g, AGRAPH, (char*)"size", size.c_str());
+  }
+  agattr(g, AGRAPH, (char*)"ratio", (char*)"fill");
+  
+
+  
+  agattr(g, AGNODE, (char*)"margin", (char*)"0.05,0.02");
+  agattr(g, AGEDGE, (char*)"len", (char*)"1.0");
+  agattr(g, AGRAPH, (char*)"sep", (char*)"+10");
   agattr(g, AGRAPH, (char*)"rankdir", (char*)"TB");
   agattr(g, AGNODE, (char*)"fontsize", (char*)"14");
-
-  // agsafeset(g, (char*)"nodesep", (char*)"0.2", (char*)"");
-  // agsafeset(g, (char*)"size", (char*)"6.4,3.6!", (char*)"");
-  // agsafeset(g, (char*)"dpi", (char*)"300", (char*)"");
-  // agsafeset(g, (char*)"overlap", (char*)"scale", (char*)"");
-  agsafeset(g, (char*)"overlap", (char*)"false", (char*)"");
-  agsafeset(g, (char*)"nodesep", (char*)"5.0", (char*)"");
-  agsafeset(g, (char*)"ranksep", (char*)"4.3", (char*)"");
-
-  agsafeset(g, (char*)"K", (char*)"0.1", (char*)"");
-
-
 
   std::map<Node*, Agnode_t*> ag_nodes;
 
@@ -270,6 +303,8 @@ void Render(Node* root, const char* filename, const char* format = "png", const 
 	  
 	  queue.push_back(child);
 	  agedge(g, parent_ag_node, child_ag_node, nullptr, 1);
+
+
 	}
   }
 
@@ -285,15 +320,22 @@ void Render(Node* root, const char* filename, const char* format = "png", const 
 int main(int argc, char** argv) {
   CLI::App app{"Mindmap output"};
 
+  
   std::string filename = "";
   std::string output_filename = "";
   std::string format = "png";
   std::string engine = "twopi";
+  std::string inch_width = "\0";
+  std::string inch_height = "\0";
+  std::string dpi = "\0";
   
   app.add_option("-i", filename, "Path of your .mop file.");
   app.add_option("-o", output_filename, "Path of your generated mindmap. Does not define the format, so write .png yourself.");
   app.add_option("-f", format, "Format of your file, e.g. png, svg, etc.");
   app.add_option("-e", engine, "Engine used to display your mindmap.");
+  app.add_option("--dpi", dpi, "DPI of your image. Significantly increases amount of pixels.");
+  app.add_option("--wd", inch_width, "Width of your image in inches.");
+  app.add_option("--hg", inch_height, "Height of your image in inches.");
   
   CLI11_PARSE(app, argc, argv);
   
@@ -307,6 +349,7 @@ int main(int argc, char** argv) {
   std::vector<Token> tokens = Parse(source);
   Interpret(tokens);
   Node* root = ReferenceTable::GetNode("root");
-  Render(root, output_filename.c_str(), format.c_str(), engine.c_str());
+  Render(root, output_filename.c_str(), dpi.c_str(), inch_width.c_str(), inch_height.c_str(), format.c_str(), engine.c_str());
 }
 
+// void Render(Node* root, const char* filename, const char* dpi = "\0", const char* inch_width = "\0", const char* inch_height = "\0", const char* format = "png", const char* engine = "twopi")
