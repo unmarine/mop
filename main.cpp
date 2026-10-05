@@ -20,9 +20,9 @@ struct Token {
   std::string reference;
 };
 
-// void Render(Node* root, const char* filename, const char* dpi = "\0", const char* inch_width = "\0", const char* inch_height = "\0", const char* format = "png", const char* engine = "twopi") {
 struct Config {
-  std::string filename;
+  std::string source_filename;
+  std::string output_filename;
   std::string inch_width;
   std::string inch_height;
   std::string dpi;
@@ -61,16 +61,6 @@ std::vector<std::string> SplitByDelimeter(std::string &source, char delimeter) {
   if (!trimmed.empty()) strings.push_back(trimmed);
   return strings;
 }
-
-
-/*
-  from "phonetics" texts [
-  "Long and short vowels" as "landsv",
-  "Matres lectionis" as "matlec",
-  "Full and defective spellings" as "fanddspel",
-  "Shewa" as "shewa"
-  ].
-*/
 /*
 std::smatch MatchTextReference(std::string &source) {
   std::regex assignation_pattern(R"(\"(.*)\"\s*as\s*\"(.*)\")");
@@ -245,7 +235,7 @@ void ShowTokens(std::vector<Token> tokens) {
   }
 }
 
-void Render(Node* root, const char* filename, const char* dpi = "\0", const char* inch_width = "\0", const char* inch_height = "\0", const char* format = "png", const char* engine = "twopi") {
+void Render(Node* root, Config* config) {
   if (!root) return;
 
   GVC_t* gvc = gvContext();
@@ -255,19 +245,17 @@ void Render(Node* root, const char* filename, const char* dpi = "\0", const char
   agattr(g, AGRAPH, (char*)"overlap", (char*)"scalexy");
   agattr(g, AGRAPH, (char*)"splines", (char*)"true");
 
-  if (dpi[0] != '\0') {
-	agattr(g, AGRAPH, (char*)"dpi", dpi);
+  if (config->dpi[0] != '\0') {
+	agattr(g, AGRAPH, (char*)"dpi", config->dpi.c_str());
   }
   
-  if (inch_width[0] != '\0' && inch_height[0] != '\0') {
-	std::string size = std::string(inch_width) + "," + inch_height + "!";
+  if (config->inch_width[0] != '\0' && config->inch_height[0] != '\0') {
+	std::string size = std::string(config->inch_width) + "," + config->inch_height + "!";
 	agattr(g, AGRAPH, (char*)"size", size.c_str());
   }
-  agattr(g, AGRAPH, (char*)"ratio", (char*)"fill");
-  
 
-  
-  agattr(g, AGNODE, (char*)"margin", (char*)"0.05,0.02");
+  agattr(g, AGRAPH, (char*)"ratio", (char*)"fill");
+    agattr(g, AGNODE, (char*)"margin", (char*)"0.05,0.02");
   agattr(g, AGEDGE, (char*)"len", (char*)"1.0");
   agattr(g, AGRAPH, (char*)"sep", (char*)"+10");
   agattr(g, AGRAPH, (char*)"rankdir", (char*)"TB");
@@ -308,8 +296,8 @@ void Render(Node* root, const char* filename, const char* dpi = "\0", const char
 	}
   }
 
-  gvLayout(gvc, g, engine);
-  gvRenderFilename(gvc, g, format, filename);
+  gvLayout(gvc, g, config->engine.c_str());
+  gvRenderFilename(gvc, g, config->format.c_str(), config->output_filename.c_str());
 
   gvFreeLayout(gvc, g);
   agclose(g);
@@ -317,39 +305,37 @@ void Render(Node* root, const char* filename, const char* dpi = "\0", const char
 }
 
 
+void SetConfigOptions(CLI::App* app, Config* config) {
+  app->add_option("-i", config->source_filename, "Path of your .mop file.");
+  app->add_option("-o", config->output_filename, "Path of your generated mindmap. Does not define the format, so write .png yourself.");
+  app->add_option("-f", config->format, "Format of your file, e.g. png, svg, etc.");
+  app->add_option("-e", config->engine, "Engine used to display your mindmap.");
+  app->add_option("--dpi", config->dpi, "DPI of your image. Significantly increases amount of pixels.");
+  app->add_option("--wd", config->inch_width, "Width of your image in inches.");
+  app->add_option("--hg", config->inch_height, "Height of your image in inches.");
+}
+
 int main(int argc, char** argv) {
   CLI::App app{"Mindmap output"};
 
-  
-  std::string filename = "";
-  std::string output_filename = "";
-  std::string format = "png";
-  std::string engine = "twopi";
-  std::string inch_width = "\0";
-  std::string inch_height = "\0";
-  std::string dpi = "\0";
-  
-  app.add_option("-i", filename, "Path of your .mop file.");
-  app.add_option("-o", output_filename, "Path of your generated mindmap. Does not define the format, so write .png yourself.");
-  app.add_option("-f", format, "Format of your file, e.g. png, svg, etc.");
-  app.add_option("-e", engine, "Engine used to display your mindmap.");
-  app.add_option("--dpi", dpi, "DPI of your image. Significantly increases amount of pixels.");
-  app.add_option("--wd", inch_width, "Width of your image in inches.");
-  app.add_option("--hg", inch_height, "Height of your image in inches.");
-  
+  Config config;
+
+  config.format = "png";
+  config.engine = "twopi";
+
+  SetConfigOptions(&app, &config);
+    
   CLI11_PARSE(app, argc, argv);
   
-  if (filename == "" || output_filename == "") {
+  if (config.source_filename == "" || config.output_filename == "") {
 	std::cout << app.help() << std::endl;
 	return 1;
   }
   
-  std::string source = ReadFile(filename);
+  std::string source = ReadFile(config.source_filename);
 
   std::vector<Token> tokens = Parse(source);
   Interpret(tokens);
   Node* root = ReferenceTable::GetNode("root");
-  Render(root, output_filename.c_str(), dpi.c_str(), inch_width.c_str(), inch_height.c_str(), format.c_str(), engine.c_str());
+  Render(root, &config);
 }
-
-// void Render(Node* root, const char* filename, const char* dpi = "\0", const char* inch_width = "\0", const char* inch_height = "\0", const char* format = "png", const char* engine = "twopi")
